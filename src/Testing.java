@@ -1,4 +1,5 @@
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Stack;
 
 public class Testing {
@@ -11,15 +12,16 @@ public class Testing {
 
 	private static void testCharacter(){
 		
-		Hero tank = new Hero(175, 25, 90, 15, 0, 0, 5, .025, .10, .10, (new Stats(2, 3.0, 3.9, 5.4, 5.7, 3.5, 4.7, 3.5)));
-		Hero dps = new Hero(95, 36, 110, 25, 0, 0, 0, .025, .1, .1, (new Stats(7, 2.8, 5.4, 4.8, 2.9, 4.7, 3.5, 5.7)));
-		Hero healer = new Hero(125, 50, 100, 15, 0, 0, 0, .025, .1, .1, (new Stats(4, 5.1, 3.9, 4.6, 3.6, 3.8, 5.7, 2.9)));
-		tank.setTurnMeter(1000 - tank.getSpeed());
-		dps.setTurnMeter(1000 - tank.getSpeed());
-		healer.setTurnMeter(1000 - tank.getSpeed());
+		Hero tank = new Hero("Tank", 175, 25, 90, 15, 0, 0, 5, .025, .10, .10, (new Stats(2, 3.0, 3.9, 5.4, 5.7, 3.5, 4.7, 3.5)));
+		Hero dps = new Hero("DPS", 95, 36, 110, 25, 0, 0, 0, .025, .1, .1, (new Stats(7, 2.8, 5.4, 4.8, 2.9, 4.7, 3.5, 5.7)));
+		Hero healer = new Hero("Healer", 125, 50, 100, 15, 0, 0, 0, .025, .1, .1, (new Stats(4, 5.1, 3.9, 4.6, 3.6, 3.8, 5.7, 2.9)));
+		tank.resetTurnMeter();
+		dps.resetTurnMeter();
+		healer.resetTurnMeter();
 		
 		tank.addAbility(new BasicPhysical(tank, .12, 2.5));
 		dps.addAbility(new BasicPhysical(dps, .12, 2.7));
+		healer.addAbility(new BasicMagic(healer, .12, 2.4));
 		healer.addAbility(new BasicHeal(healer, .12, 2.1));
 		
 		ArrayList<Character> stage = new ArrayList();
@@ -59,11 +61,16 @@ public class Testing {
 		Character min = null;
 		Stack<Character> turn = new Stack();
 		
+		tank.resetTurnMeter();
+		dps.resetTurnMeter();
+		healer.resetTurnMeter();
+		
 		while(tank.getCurrentHealth() > 0 && dps.getCurrentHealth() > 0){
 			int j = 0;
 			for(Character hero: stage){
 				if(j == 0){
 					min = hero;
+					turn.clear();
 					turn.add(hero);
 				} else {
 					if (min.getTurnMeter() > hero.getTurnMeter()){
@@ -74,8 +81,50 @@ public class Testing {
 						turn.add(hero);
 					}
 				}
+				j++;
 			}
-			
+			int turnMeterReduce = min.getTurnMeter();
+			for(Character hero: stage){
+				hero.setTurnMeter(hero.getTurnMeter() - turnMeterReduce);
+			}
+			Collections.shuffle(turn);
+			for(Character toGo: turn){
+				System.out.printf("Tank: %d\nDPS: %d\nHealer: %d\n\n", tank.getTurnMeter(), dps.getTurnMeter(), healer.getTurnMeter());
+				if(toGo.getName().equals("Tank")){
+					System.out.println("Tank Attacking DPS");
+					toGo.useAbility(0, tankUseOn);
+					System.out.printf("DPS:\nHealth: %d | Energy: %d\n\n", dps.getCurrentHealth(), dps.getCurrentEnergy());
+				} else if(toGo.getName().equals("DPS")){
+					System.out.println("DPS Attacking Tank");
+					toGo.useAbility(0, dpsUseOn);
+					System.out.printf("Tank:\nHealth: %d | Energy: %d\n\n", tank.getCurrentHealth(), tank.getCurrentEnergy());
+				} else {
+					if( i%5 == 0){
+						if(i%2 == 0){
+							System.out.println("Healer Healing Tank");
+							toGo.useAbility(1, dpsUseOn);
+							System.out.printf("Tank:\nHealth: %d | Energy: %d\n\n", tank.getCurrentHealth(), tank.getCurrentEnergy());
+						} else {
+							System.out.println("Healer Healing DPS");
+							toGo.useAbility(1, tankUseOn);
+							System.out.printf("DPS:\nHealth: %d | Energy: %d\n\n", dps.getCurrentHealth(), dps.getCurrentEnergy());
+						}
+					} else {
+						if(i%2 == 0){
+							System.out.println("Healer Attacking Tank");
+							toGo.useAbility(0, dpsUseOn);
+							System.out.printf("Tank:\nHealth: %d | Energy: %d\n\n", tank.getCurrentHealth(), tank.getCurrentEnergy());
+						} else {
+							System.out.println("Healer Attacking DPS");
+							toGo.useAbility(0, tankUseOn);
+							System.out.printf("DPS:\nHealth: %d | Energy: %d\n\n", dps.getCurrentHealth(), dps.getCurrentEnergy());
+						}
+					}
+					i++;
+				}
+				toGo.resetTurnMeter();
+			}
+			turn.clear();
 
 		}
 		

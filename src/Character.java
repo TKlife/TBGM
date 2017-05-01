@@ -10,14 +10,15 @@ public abstract class Character {
 	int currentHealth, totalHealth, currentEnergy, totalEnergy;
 	double critChance, potency, dodge;
 	int turnMeter;
+	String name;
 	Stats playerStats;
 	ArrayList<Ability> abilities;
 	ArrayList<StatusEffect> statusEffects;
 	
-	public Character(int baseHealth, int baseEnergy, int baseSpeed, int basePysicalDamage, int baseMagicDamage, int baseHealing, int baseHealability,
+	public Character(String name, int baseHealth, int baseEnergy, int baseSpeed, int basePysicalDamage, int baseMagicDamage, int baseHealing, int baseHealability,
 			double critChance, double potency, double dodge, Stats playerStats) {
 		super();
-		
+		this.name = name;
 		this.baseHealth = baseHealth;
 		this.baseEnergy = baseEnergy;
 		this.baseSpeed = baseSpeed;
@@ -122,6 +123,10 @@ public abstract class Character {
 		return playerStats.getPhysicalDamage() + basePhysicalDamage;
 	}
 	
+	public void resetTurnMeter(){
+		turnMeter = 1000 - getSpeed();
+	}
+	
 	public int getMagicalDamage(){
 		return playerStats.getMagicDamage() + baseMagicDamage;
 	}
@@ -210,6 +215,54 @@ public abstract class Character {
 	public void setTurnMeter(int turnMeter) {
 		this.turnMeter = turnMeter;
 	}
+	public static Random getRandom() {
+		return random;
+	}
+
+	public static void setRandom(Random random) {
+		Character.random = random;
+	}
+
+	public int getLevel() {
+		return level;
+	}
+
+	public void setLevel(int level) {
+		this.level = level;
+	}
+
+	public int getBasePhysicalDamage() {
+		return basePhysicalDamage;
+	}
+
+	public void setBasePhysicalDamage(int basePhysicalDamage) {
+		this.basePhysicalDamage = basePhysicalDamage;
+	}
+
+	public int getBaseHealing() {
+		return baseHealing;
+	}
+
+	public void setBaseHealing(int baseHealing) {
+		this.baseHealing = baseHealing;
+	}
+
+	public int getBaseHealability() {
+		return baseHealability;
+	}
+
+	public void setBaseHealability(int baseHealability) {
+		this.baseHealability = baseHealability;
+	}
+
+	public String getName() {
+		return name;
+	}
+
+	public void setName(String name) {
+		this.name = name;
+	}
+
 	public Stats getPlayerStats() {
 		return playerStats;
 	}
