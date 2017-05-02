@@ -6,7 +6,7 @@ public class BasicMagic extends Ability {
 	}
 
 	@Override
-	public void applyEffect(Character affected) {
+	public void useAbility(Character affected) {
 		// TODO Auto-generated method stub
 		int damage = (int) (owner.magicalAttack()*multiplier);
 		System.out.print("Total Damage: " + damage);

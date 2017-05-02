@@ -7,7 +7,7 @@ public class BasicHeal extends Ability{
 	}
 
 	@Override
-	public void applyEffect(Character affected) {
+	public void useAbility(Character affected) {
 		int heal = (int) (owner.heal()*multiplier);
 		System.out.print("Total Heal: " + heal);
 		affected.recieveHeal(heal);

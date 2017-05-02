@@ -120,7 +120,7 @@ public class Stats {
 	}
 	
 	public int getHealing(){
-		return (int) ((10)*(intellect) + (0.5)*(ethics));
+		return (int) ((10)*(intellect) + (0.25)*(ethics));
 	}
 	
 	public int getHealability(){
@@ -156,59 +156,59 @@ public class Stats {
 		pscAdder *= STARGROWTH;
 	}
 	
-	public int getIntellect() {
-		return (int) intellect;
+	public double getIntellect() {
+		return  intellect;
 	}
 
-	public void setIntellect(int intellect) {
+	public void setIntellect(double intellect) {
 		this.intellect = intellect;
 	}
 
-	public int getStrength() {
-		return (int) strength;
+	public double getStrength() {
+		return strength;
 	}
 
-	public void setStrength(int strength) {
+	public void setStrength(double strength) {
 		this.strength = strength;
 	}
 
-	public int getDexterity() {
-		return (int) dexterity;
+	public double getDexterity() {
+		return dexterity;
 	}
 
-	public void setDexterity(int dexterity) {
+	public void setDexterity(double dexterity) {
 		this.dexterity = dexterity;
 	}
 
-	public int getStamina() {
-		return (int) stamina;
+	public double getStamina() {
+		return stamina;
 	}
 
-	public void setStamina(int stamina) {
+	public void setStamina(double stamina) {
 		this.stamina = stamina;
 	}
 
-	public int getAgility() {
-		return (int) agility;
+	public double getAgility() {
+		return agility;
 	}
 
-	public void setAgility(int agility) {
+	public void setAgility(double agility) {
 		this.agility = agility;
 	}
 
-	public int getEthics() {
-		return (int) ethics;
+	public double getEthics() {
+		return ethics;
 	}
 
-	public void setEthics(int ethics) {
+	public void setEthics(double ethics) {
 		this.ethics = ethics;
 	}
 
-	public int getPschotics() {
-		return (int) psychotics;
+	public double getPschotics() {
+		return psychotics;
 	}
 
-	public void setPschotics(int psychotics) {
+	public void setPschotics(double psychotics) {
 		this.psychotics = psychotics;
 	}
 

@@ -5,8 +5,7 @@ public class BasicPhysical extends Ability{
 		super(owner, energyCost, multipler);
 	}
 
-	public void applyEffect(Character affected) {
-		// TODO Auto-generated method stub
+	public void useAbility(Character affected) {
 		int damage = (int) (owner.physicalAttack()*multiplier);
 		System.out.print("Total Damage: " + damage);
 		affected.defendPhysicalAttack(damage);

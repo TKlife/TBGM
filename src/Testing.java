@@ -12,9 +12,9 @@ public class Testing {
 
 	private static void testCharacter(){
 		
-		Hero tank = new Hero("Tank", 175, 25, 90, 15, 0, 0, 5, .025, .10, .10, (new Stats(2, 3.0, 3.9, 5.4, 5.7, 3.5, 4.7, 3.5)));
-		Hero dps = new Hero("DPS", 95, 36, 110, 25, 0, 0, 0, .025, .1, .1, (new Stats(7, 2.8, 5.4, 4.8, 2.9, 4.7, 3.5, 5.7)));
-		Hero healer = new Hero("Healer", 125, 50, 100, 15, 0, 0, 0, .025, .1, .1, (new Stats(4, 5.1, 3.9, 4.6, 3.6, 3.8, 5.7, 2.9)));
+		Hero tank = new Hero("Tank", 175, 25, 90, 15, 0, 0, 5, .05, .05, .25, .10, .10, (new Stats(2, 3.0, 3.9, 5.4, 5.7, 3.5, 4.7, 3.5)));
+		Hero dps = new Hero("DPS", 95, 36, 110, 25, 0, 0, 0, .01, .01, .25, .1, .1, (new Stats(7, 2.8, 5.4, 4.8, 2.9, 4.7, 3.5, 5.7)));
+		Hero healer = new Hero("Healer", 125, 50, 100, 15, 0, 0, 0, .025, .025, .25, .1, .1, (new Stats(4, 5.1, 3.9, 4.6, 3.6, 3.8, 5.7, 2.9)));
 		tank.resetTurnMeter();
 		dps.resetTurnMeter();
 		healer.resetTurnMeter();
@@ -57,7 +57,7 @@ public class Testing {
 		ArrayList<Character> dpsUseOn = new ArrayList<Character>();
 		tankUseOn.add(dps);
 		dpsUseOn.add(tank);
-		int i = 1;
+		int i = 1, k = 0;
 		Character min = null;
 		Stack<Character> turn = new Stack();
 		
@@ -65,7 +65,13 @@ public class Testing {
 		dps.resetTurnMeter();
 		healer.resetTurnMeter();
 		
+		BuffDebuff buff = new StatModifier("Offence Up", true, false, 1, 1.5, 1, 1, 1, 1, 1.5);
+		buff.applyEffect(dps);
 		while(tank.getCurrentHealth() > 0 && dps.getCurrentHealth() > 0){
+			k++;
+			if(k == 5){
+				buff.reverseEffect(dps);
+			}
 			int j = 0;
 			for(Character hero: stage){
 				if(j == 0){
@@ -89,35 +95,35 @@ public class Testing {
 			}
 			Collections.shuffle(turn);
 			for(Character toGo: turn){
-				System.out.printf("Tank: %d\nDPS: %d\nHealer: %d\n\n", tank.getTurnMeter(), dps.getTurnMeter(), healer.getTurnMeter());
+				System.out.printf("Turn Number: %d\nTank: %d\nDPS: %d\nHealer: %d\n\n", k, tank.getTurnMeter(), dps.getTurnMeter(), healer.getTurnMeter());
 				if(toGo.getName().equals("Tank")){
 					System.out.println("Tank Attacking DPS");
 					toGo.useAbility(0, tankUseOn);
-					System.out.printf("DPS:\nHealth: %d | Energy: %d\n\n", dps.getCurrentHealth(), dps.getCurrentEnergy());
+					System.out.println(dps.toString());
 				} else if(toGo.getName().equals("DPS")){
 					System.out.println("DPS Attacking Tank");
 					toGo.useAbility(0, dpsUseOn);
-					System.out.printf("Tank:\nHealth: %d | Energy: %d\n\n", tank.getCurrentHealth(), tank.getCurrentEnergy());
+					System.out.printf(tank.currentStats() + "\n");
 				} else {
 					if( i%5 == 0){
 						if(i%2 == 0){
 							System.out.println("Healer Healing Tank");
 							toGo.useAbility(1, dpsUseOn);
-							System.out.printf("Tank:\nHealth: %d | Energy: %d\n\n", tank.getCurrentHealth(), tank.getCurrentEnergy());
+							System.out.printf(tank.currentStats() + "\n");
 						} else {
 							System.out.println("Healer Healing DPS");
 							toGo.useAbility(1, tankUseOn);
-							System.out.printf("DPS:\nHealth: %d | Energy: %d\n\n", dps.getCurrentHealth(), dps.getCurrentEnergy());
+							System.out.println(dps.toString());
 						}
 					} else {
 						if(i%2 == 0){
 							System.out.println("Healer Attacking Tank");
 							toGo.useAbility(0, dpsUseOn);
-							System.out.printf("Tank:\nHealth: %d | Energy: %d\n\n", tank.getCurrentHealth(), tank.getCurrentEnergy());
+							System.out.printf(tank.currentStats() + "\n");
 						} else {
 							System.out.println("Healer Attacking DPS");
 							toGo.useAbility(0, tankUseOn);
-							System.out.printf("DPS:\nHealth: %d | Energy: %d\n\n", dps.getCurrentHealth(), dps.getCurrentEnergy());
+							System.out.printf(dps.currentStats() + "\n");
 						}
 					}
 					i++;

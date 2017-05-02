@@ -7,16 +7,18 @@ public abstract class Character {
 	int level;
 	int baseHealth, baseEnergy, baseSpeed; 
 	int basePhysicalDamage, baseMagicDamage, baseHealing, baseHealability;
+	double basePhysicalDefence, baseMagicDefence;
 	int currentHealth, totalHealth, currentEnergy, totalEnergy;
 	double critChance, potency, dodge;
 	int turnMeter;
 	String name;
 	Stats playerStats;
 	ArrayList<Ability> abilities;
-	ArrayList<StatusEffect> statusEffects;
+	ArrayList<BuffDebuff> buffs;
+	ArrayList<BuffDebuff> debuffs;
 	
 	public Character(String name, int baseHealth, int baseEnergy, int baseSpeed, int basePysicalDamage, int baseMagicDamage, int baseHealing, int baseHealability,
-			double critChance, double potency, double dodge, Stats playerStats) {
+			double basePhysicalDefence, double baseMagicDefence, double critChance, double potency, double dodge, Stats playerStats) {
 		super();
 		this.name = name;
 		this.baseHealth = baseHealth;
@@ -26,6 +28,8 @@ public abstract class Character {
 		this.baseMagicDamage = baseMagicDamage;
 		this.baseHealing = baseHealing;
 		this.baseHealability = baseHealability;
+		this.basePhysicalDefence = basePhysicalDefence;
+		this.baseMagicDefence = baseMagicDefence;
 		this.critChance = critChance;
 		this.potency = potency;
 		this.dodge = dodge;
@@ -39,7 +43,12 @@ public abstract class Character {
 		this.currentEnergy = totalEnergy;
 		turnMeter = 0;
 		abilities = new ArrayList();
-		statusEffects = new ArrayList();
+		buffs = new ArrayList();
+		debuffs = new ArrayList();
+	}
+	
+	public void endTurn(){
+		resetTurnMeter();
 	}
 	
 	public void takeDamage(int damage){
@@ -57,16 +66,12 @@ public abstract class Character {
 	}
 	
 	public void useAbility(int index, ArrayList<Character> useOn){
-		for (Character chara: useOn){
-			abilities.get(index).applyEffect(chara);
-		}
+		abilities.get(index).useAbility(useOn);
 	}
 	
 	public void useAbility(Ability ability, ArrayList<Character> useOn){
 		if(abilities.contains(ability)){
-			for (Character chara: useOn){
-				ability.applyEffect(chara);
-			}
+				ability.useAbility(useOn);
 		}
 	}
 	
@@ -79,13 +84,13 @@ public abstract class Character {
 	}
 	
 	public void defendPhysicalAttack(int damage){
-		damage = (int) (damage - damage*playerStats.getPhysicalDefence());
+		damage = (int) (damage - damage*getPhysicalDefence());
 		System.out.print(" | After Defence: " + damage + "\n");
 		takeDamage(damage);
 	}
 	
 	public void defendMagicalAttack(int damage){
-		damage = (int) (damage - damage*playerStats.getMagicDefence());
+		damage = (int) (damage - damage*getMagicDefence());
 		System.out.print(" | After Defence: " + damage + "\n");
 		takeDamage(damage);
 	}
@@ -123,12 +128,20 @@ public abstract class Character {
 		return playerStats.getPhysicalDamage() + basePhysicalDamage;
 	}
 	
-	public void resetTurnMeter(){
-		turnMeter = 1000 - getSpeed();
+	public double getPhysicalDefence(){
+		return playerStats.getPhysicalDefence() + basePhysicalDefence;
 	}
 	
 	public int getMagicalDamage(){
 		return playerStats.getMagicDamage() + baseMagicDamage;
+	}
+	
+	public double getMagicDefence(){
+		return playerStats.getMagicDefence() + baseMagicDefence;
+	}
+	
+	public void resetTurnMeter(){
+		turnMeter = 1000 - getSpeed();
 	}
 	
 	public int getBaseHealth() {
@@ -164,6 +177,19 @@ public abstract class Character {
 	public void setBaseMagicDamage(int baseMagicDamage) {
 		this.baseMagicDamage = baseMagicDamage;
 	}
+	public double getBasePhysicalDefence() {
+		return basePhysicalDefence;
+	}
+	public void setBasePhysicalDefence(double basePhysicalDefence) {
+		this.basePhysicalDefence = basePhysicalDefence;
+	}
+	public double getBaseMagicDefence() {
+		return baseMagicDefence;
+	}
+	public void setBaseMagicDefence(double baseMagicalDefence) {
+		this.baseMagicDefence = baseMagicalDefence;
+	}
+
 	public int getCurrentHealth() {
 		return currentHealth;
 	}
@@ -279,30 +305,56 @@ public abstract class Character {
 	public void addAbility(Ability ability){
 		abilities.add(ability);
 	}
-	public ArrayList<StatusEffect> getStatusEffects() {
-		return statusEffects;
+	
+	public ArrayList<BuffDebuff> getBuffs() {
+		return buffs;
 	}
-	public void setStatusEffects(ArrayList<StatusEffect> statusEffects) {
-		this.statusEffects = statusEffects;
+	
+	public BuffDebuff getBuff(int index) {
+		return buffs.get(index);
+	}
+
+	public void setBuffs(ArrayList<BuffDebuff> buffs) {
+		this.buffs = buffs;
+	}
+
+	public ArrayList<BuffDebuff> getDebuffs() {
+		return debuffs;
+	}
+	
+	public BuffDebuff getDebuff(int index) {
+		return debuffs.get(index);
+	}
+	
+	public void setDebuffs(ArrayList<BuffDebuff> debuffs) {
+		this.debuffs = debuffs;
 	}
 	
 	public String currentStats(){
-		String s = "";
-		s = "Health: " + String.valueOf(getCurrentHealth());
+		String s = name + "\n";
+		s += "Health: " + String.valueOf(getCurrentHealth());
 		s += " | Energy: " + String.valueOf(getCurrentEnergy()) + "\n";
+		s += "Buffs: ";
+		for (BuffDebuff buff: buffs){
+			s += buff.getName() + " | ";
+		} s += "\n";
+		s += "debuffs: ";
+		for (BuffDebuff debuff: debuffs){
+			s += debuff.getName() + " | ";
+		} s += "\n";
 		return s;
 	}
 	
 	@Override
 	public String toString(){
-		String s = "";
-		s = "Health: " + String.valueOf(getCurrentHealth());
+		String s = name + "\n";
+		s += "Health: " + String.valueOf(getCurrentHealth());
 		s += " | Energy: " + String.valueOf(getCurrentEnergy()) + "\n";
 		s += String.format("Stars: %d, Agi: %f, Dex: %f, Eth: %f, Int: %f, Psc: %f, Stam: %f, Str: %f\nHealth: %d | Energy: %d | Speed: %d\n"
 				+ "Pysical Damage: %d | Magic Damgage: %d | Healing: %d | Healability: %d\nPysical Defence: %.2f%% | Magic Defence: %.2f%%\n\n", playerStats.starCount, 
 				playerStats.agility, playerStats.dexterity, playerStats.ethics, playerStats.intellect, playerStats.psychotics, playerStats.stamina, playerStats.strength, 
 				totalHealth, totalEnergy, playerStats.getSpeed() + baseSpeed, playerStats.getPhysicalDamage() + basePhysicalDamage, playerStats.getMagicDamage() + baseMagicDamage, 
-				playerStats.getHealing() + baseHealing, playerStats.getHealability() + baseHealability, 100*playerStats.getPhysicalDefence(), 100*playerStats.getMagicDefence());
+				playerStats.getHealing() + baseHealing, playerStats.getHealability() + baseHealability, 100*getPhysicalDefence(), 100*getMagicDefence());
 		return s;
 		
 	}
