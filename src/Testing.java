@@ -11,7 +11,7 @@ public class Testing {
 		//testStats();
 		//testCharacter();
 		testBuffDebuffAbility();
-	
+		testBinder();
 	}
 	
 	private static void testBuffDebuffAbility(){
@@ -33,14 +33,34 @@ public class Testing {
 		System.out.println(tank.toString());
 		System.out.println(healer.toString());
 		
-		BuffDebuff offenceDown = new StatModifier("Offence Down", false, false, false, 3);
-		BuffDebuff offenceUp = new StatModifier("Offence Up", true, false, false, 5, 1,1.5,1,1,1,1,1.5);
-		BuffDebuff damageOverTime;
+		BuffDebuff offenceDown = new StatModifier("Offence Down", false, false, 3, false);
+		BuffDebuff offenceUp = new StatModifier("Offence Up", true, false, 5, false, 1,1.5,1,1,1,1,1.5);
+		BuffDebuff defenceDown = new CharacterModifier("Defence Down", false, false, 3);
+		defenceDown.addEffect(new Effect(){
+			double oldMagicDefence, oldPhysicalDefence;
+			@Override
+			public void apply(Character affected) {
+				oldMagicDefence = affected.getBaseMagicDefence();
+				oldPhysicalDefence = affected.getBasePhysicalDefence();
+				affected.setBaseMagicDefence(-0.5);
+				affected.setBasePhysicalDefence(-0.5);
+			}@Override
+			public void reverse(Character affected) {
+				// TODO Auto-generated method stub
+				affected.setBaseMagicDefence(oldMagicDefence);
+				affected.setBasePhysicalDefence(oldPhysicalDefence);
+			}
+			@Override
+			public void overTime(Character affected) {
+				// TODO Auto-generated method stub
+			}
+		});
 		((StatModifier)(offenceDown)).setStrength(0.5);
 		((StatModifier)(offenceDown)).setPsychotics(0.5);
 		
 		offenceDown.applyEffect(dps);
 		offenceUp.applyEffect(tank);
+		defenceDown.applyEffect(tank);
 		System.out.println(dps.toString());
 		System.out.println(tank.toString());
 		for (int i = 0; i< 6; i++){
@@ -110,7 +130,7 @@ public class Testing {
 		dps.resetTurnMeter();
 		healer.resetTurnMeter();
 		
-		BuffDebuff buff = new StatModifier("Offence Up", true, false, false, 4, 1, 1.5, 1, 1, 1, 1, 1.5);
+		BuffDebuff buff = new StatModifier("Offence Up", true, false, 4, false, 1, 1.5, 1, 1, 1, 1, 1.5);
 		buff.applyEffect(dps);
 		while(tank.getCurrentHealth() > 0 && dps.getCurrentHealth() > 0){
 			k++;
@@ -176,6 +196,31 @@ public class Testing {
 
 		}
 		
+	}
+	
+	private static void testBinder(){
+		Binder<Effect> effectsBinder = new Binder<Effect>();
+		Effect item = new Effect(){
+			double oldMagicDefence, oldPhysicalDefence;
+			@Override
+			public void apply(Character affected) {
+				oldMagicDefence = affected.getBaseMagicDefence();
+				oldPhysicalDefence = affected.getBasePhysicalDefence();
+				affected.setBaseMagicDefence(-0.5);
+				affected.setBasePhysicalDefence(-0.5);
+			}@Override
+			public void reverse(Character affected) {
+				// TODO Auto-generated method stub
+				affected.setBaseMagicDefence(oldMagicDefence);
+				affected.setBasePhysicalDefence(oldPhysicalDefence);
+			}
+			@Override
+			public void overTime(Character affected) {
+				// TODO Auto-generated method stub
+			}
+		};
+		effectsBinder.addEntry("Defence Down", item);
+		System.out.println(effectsBinder.toString());
 	}
 	
 	private static void testStats(){

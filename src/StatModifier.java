@@ -2,6 +2,7 @@ import java.util.ArrayList;
 
 public class StatModifier extends BuffDebuff {
 
+	boolean additive;
 	double intellect, strength, dexterity, stamina, agility, ethics, psychotics;
 	
 	public StatModifier(BuffDebuff copyFrom){
@@ -15,10 +16,12 @@ public class StatModifier extends BuffDebuff {
 			this.agility = toCopy.getAgility();
 			this.ethics = toCopy.getEthics();
 			this.psychotics = toCopy.getPsychotics();
+			this.additive = toCopy.isAdditive();
 		}
 	}
-	public StatModifier(String name, boolean buff, boolean additive, boolean overTime, int duration) {
-		super(name, buff, additive, overTime, duration);
+	public StatModifier(String name, boolean buff, boolean overTime, int duration, boolean additive) {
+		super(name, buff, overTime, duration);
+		this.additive = additive;
 		if(!additive){
 			this.intellect = 1;
 			this.strength = 1;
@@ -38,9 +41,9 @@ public class StatModifier extends BuffDebuff {
 		}
 	}
 
-	public StatModifier(String name, boolean buff, boolean additive, boolean overTime, int duration, double intellect, double strength, double dexterity,
+	public StatModifier(String name, boolean buff, boolean overTime, int duration, boolean additive, double intellect, double strength, double dexterity,
 			double stamina, double agility, double ethics, double psychotics) {
-		super(name, buff, additive, overTime, duration);
+		super(name, buff, overTime, duration);
 		this.intellect = intellect;
 		this.strength = strength;
 		this.dexterity = dexterity;
@@ -48,6 +51,7 @@ public class StatModifier extends BuffDebuff {
 		this.agility = agility;
 		this.ethics = ethics;
 		this.psychotics = psychotics;
+		this.additive = additive;
 	}
 
 	@Override
@@ -163,6 +167,13 @@ public class StatModifier extends BuffDebuff {
 
 	public void setPsychotics(double psychotics) {
 		this.psychotics = psychotics;
+	}
+	
+	public boolean isAdditive() {
+		return additive;
+	}
+	public void setAdditive(boolean additive) {
+		this.additive = additive;
 	}
 	@Override
 	public boolean overTimeEffect(Character reciever) {

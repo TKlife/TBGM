@@ -1,24 +1,28 @@
+import java.util.ArrayList;
 
 public abstract class BuffDebuff {
 	
 	String name;
 	int duration, stack;
-	boolean buff, additive, overTime;
+	boolean buff, overTime;
+	ArrayList<Effect> effects;
 	
 	public BuffDebuff(BuffDebuff toCopy){
 		this.name = toCopy.getName();
 		this.buff = toCopy.isBuff();
-		this.additive = toCopy.isAdditive();
 		this.duration = toCopy.getDuration();
 		this.overTime = toCopy.isOverTime();
+		this.effects = toCopy.getEffects();
+		this.stack = toCopy.getStack();
 	}
-	public BuffDebuff(String name, boolean buff, boolean additive, boolean overTime, int duration) {
+	public BuffDebuff(String name, boolean buff, boolean overTime, int duration) {
 		super();
 		this.name = name;
 		this.buff = buff;
-		this.additive = additive;
 		this.duration = duration;
 		this.overTime = overTime;
+		this.stack = 1;
+		this.effects = new ArrayList();
 	}
 	public abstract boolean applyEffect(Character reciever);
 	public abstract boolean reverseEffect(Character reciever);
@@ -45,6 +49,14 @@ public abstract class BuffDebuff {
 		return false;
 	}
 	
+	public void addEffect(Effect effect){
+		effects.add(effect);
+	}
+	
+	public void removeEffect(Effect effect){
+		effects.remove(effect);
+	}
+	
 	public String getName() {
 		return name;
 	}
@@ -56,12 +68,6 @@ public abstract class BuffDebuff {
 	}
 	public void setBuff(boolean buff) {
 		this.buff = buff;
-	}
-	public boolean isAdditive() {
-		return additive;
-	}
-	public void setAdditive(boolean additive) {
-		this.additive = additive;
 	}
 	public int getDuration() {
 		return duration;
@@ -80,6 +86,12 @@ public abstract class BuffDebuff {
 	}
 	public void setOverTime(boolean overTime) {
 		this.overTime = overTime;
+	}
+	public ArrayList<Effect> getEffects() {
+		return effects;
+	}
+	public void setEffects(ArrayList<Effect> effects) {
+		this.effects = effects;
 	}
 	
 	

@@ -133,13 +133,13 @@ public abstract class Character {
 	}
 	
 	public void defendPhysicalAttack(int damage){
-		damage = (int) (damage - damage*getPhysicalDefence());
+		damage = (int) (damage - (damage*getPhysicalDefence()));
 		System.out.print(" | After Defence: " + damage + "\n");
 		takeDamage(damage);
 	}
 	
 	public void defendMagicalAttack(int damage){
-		damage = (int) (damage - damage*getMagicDefence());
+		damage = (int) (damage - (damage*getMagicDefence()));
 		System.out.print(" | After Defence: " + damage + "\n");
 		takeDamage(damage);
 	}
