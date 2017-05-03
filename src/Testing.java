@@ -2,14 +2,59 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Stack;
 
+import javax.swing.event.ListSelectionEvent;
+
 public class Testing {
 
 	public static void main(String[] args) {
 		// TODO Auto-generated method stub
 		//testStats();
-		testCharacter();
+		//testCharacter();
+		testBuffDebuffAbility();
+	
 	}
-
+	
+	private static void testBuffDebuffAbility(){
+		
+		Hero tank = new Hero("Tank", 175, 25, 90, 15, 0, 0, 5, .05, .05, .25, .10, .10, (new Stats(7, 3.0, 3.9, 5.4, 5.7, 3.5, 4.7, 3.5)));
+		Hero support = new Hero("Support", 95, 36, 110, 25, 0, 0, 0, .01, .01, .25, .1, .1, (new Stats(7, 2.8, 3.4, 5.9, 3.9, 5.0, 3.5, 3.5)));
+		Hero dps = new Hero("DPS", 95, 36, 110, 25, 0, 0, 0, .01, .01, .25, .1, .1, (new Stats(7, 2.8, 5.4, 4.8, 2.9, 4.7, 3.5, 5.7)));
+		Hero healer = new Hero("Healer", 125, 50, 100, 15, 0, 0, 0, .025, .025, .25, .1, .1, (new Stats(7, 5.1, 3.9, 4.6, 3.6, 3.8, 5.7, 2.9)));
+		
+		tank.levelUp(69);
+		support.levelUp(69);
+		dps.levelUp(69);
+		healer.levelUp(69);
+		
+		tank.addAbility(new BasicPhysical(tank, .12, 2.5));
+		dps.addAbility(new BasicPhysical(dps, .12, 2.7));
+		System.out.println(dps.toString());
+		System.out.println(support.toString());
+		System.out.println(tank.toString());
+		System.out.println(healer.toString());
+		
+		BuffDebuff offenceDown = new StatModifier("Offence Down", false, false, false, 3);
+		BuffDebuff offenceUp = new StatModifier("Offence Up", true, false, false, 5, 1,1.5,1,1,1,1,1.5);
+		BuffDebuff damageOverTime;
+		((StatModifier)(offenceDown)).setStrength(0.5);
+		((StatModifier)(offenceDown)).setPsychotics(0.5);
+		
+		offenceDown.applyEffect(dps);
+		offenceUp.applyEffect(tank);
+		System.out.println(dps.toString());
+		System.out.println(tank.toString());
+		for (int i = 0; i< 6; i++){
+			System.out.println("DPS Attacking");
+			dps.useAbility(0, tank);
+			System.out.println("\n" + tank.currentStats());
+			dps.endTurn();
+			System.out.println("Tank Attacking");
+			tank.useAbility(0, dps);
+			System.out.println("\n" + dps.currentStats());
+			tank.endTurn();
+		}
+	}
+	
 	private static void testCharacter(){
 		
 		Hero tank = new Hero("Tank", 175, 25, 90, 15, 0, 0, 5, .05, .05, .25, .10, .10, (new Stats(2, 3.0, 3.9, 5.4, 5.7, 3.5, 4.7, 3.5)));
@@ -65,13 +110,10 @@ public class Testing {
 		dps.resetTurnMeter();
 		healer.resetTurnMeter();
 		
-		BuffDebuff buff = new StatModifier("Offence Up", true, false, 1, 1.5, 1, 1, 1, 1, 1.5);
+		BuffDebuff buff = new StatModifier("Offence Up", true, false, false, 4, 1, 1.5, 1, 1, 1, 1, 1.5);
 		buff.applyEffect(dps);
 		while(tank.getCurrentHealth() > 0 && dps.getCurrentHealth() > 0){
 			k++;
-			if(k == 5){
-				buff.reverseEffect(dps);
-			}
 			int j = 0;
 			for(Character hero: stage){
 				if(j == 0){
@@ -128,7 +170,7 @@ public class Testing {
 					}
 					i++;
 				}
-				toGo.resetTurnMeter();
+				toGo.endTurn();
 			}
 			turn.clear();
 

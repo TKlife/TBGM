@@ -35,8 +35,7 @@ public abstract class Character {
 		this.dodge = dodge;
 		this.playerStats = playerStats;
 		
-		this.playerStats.levelUp();
-		level = 1;
+		levelUp();
 		this.totalHealth = playerStats.getHealth() + baseHealth;
 		this.currentHealth = totalHealth;
 		this.totalEnergy = playerStats.getEnergy() + baseEnergy;
@@ -47,8 +46,48 @@ public abstract class Character {
 		debuffs = new ArrayList();
 	}
 	
+	public void levelUp(){
+		playerStats.levelUp();
+		totalHealth = baseHealth + playerStats.getHealth();
+		currentHealth = totalHealth;
+		totalEnergy = baseEnergy + playerStats.getEnergy();
+		currentEnergy = totalEnergy;
+		level++;
+	}
+	
+	public void levelUp(int amount){
+		for (int i = 0; i < amount; i++){
+			levelUp();
+		}
+	}
+	
+	public void promote(){
+		playerStats.promote();
+		totalHealth = baseHealth + playerStats.getHealth();
+		currentHealth = totalHealth;
+		totalEnergy = baseEnergy + playerStats.getEnergy();
+		currentEnergy = totalEnergy;
+	}
+	
 	public void endTurn(){
 		resetTurnMeter();
+		ArrayList<BuffDebuff> remove = new ArrayList();
+
+		for (BuffDebuff buff: buffs){
+			if(buff.endTurn(this)) {
+				buff.reverseEffect(this);
+				remove.add(buff);
+			}
+		}
+		buffs.removeAll(remove);
+		remove.clear();
+		for (BuffDebuff debuff: debuffs){
+			if(debuff.endTurn(this)) {
+				debuff.reverseEffect(this);
+				remove.add(debuff);
+			}
+		}
+		debuffs.removeAll(remove);
 	}
 	
 	public void takeDamage(int damage){
@@ -62,6 +101,16 @@ public abstract class Character {
 		setCurrentHealth(currentHealth + recover);
 		if (currentHealth >= totalHealth){
 			currentHealth = totalHealth;
+		}
+	}
+	
+	public void useAbility(int index, Character useOn){
+		abilities.get(index).useAbility(useOn);
+	}
+	
+	public void useAbility(Ability ability, Character useOn){
+		if(abilities.contains(ability)){
+				ability.useAbility(useOn);
 		}
 	}
 	
@@ -142,6 +191,24 @@ public abstract class Character {
 	
 	public void resetTurnMeter(){
 		turnMeter = 1000 - getSpeed();
+	}
+	
+	public BuffDebuff hasBuffDebuff(BuffDebuff buffDebuff){
+		if(buffDebuff.isBuff()){
+			for(BuffDebuff buff: buffs){
+				if (buffDebuff.getName().equals(buff.getName())){
+					return buff;
+				}
+			}
+		} else{
+			for(BuffDebuff debuff: debuffs){
+				if (buffDebuff.getName().equals(debuff.getName())){
+					return debuff;
+				}
+			}
+		}
+		
+		return null;
 	}
 	
 	public int getBaseHealth() {
@@ -331,26 +398,24 @@ public abstract class Character {
 	}
 	
 	public String currentStats(){
-		String s = name + "\n";
+		String s = name + ":\n";
 		s += "Health: " + String.valueOf(getCurrentHealth());
 		s += " | Energy: " + String.valueOf(getCurrentEnergy()) + "\n";
 		s += "Buffs: ";
 		for (BuffDebuff buff: buffs){
-			s += buff.getName() + " | ";
+			s += buff.getName() + " " + buff.getDuration() + " | ";
 		} s += "\n";
 		s += "debuffs: ";
 		for (BuffDebuff debuff: debuffs){
-			s += debuff.getName() + " | ";
+			s += debuff.getName() +  " " + debuff.getDuration() + " | ";
 		} s += "\n";
 		return s;
 	}
 	
 	@Override
 	public String toString(){
-		String s = name + "\n";
-		s += "Health: " + String.valueOf(getCurrentHealth());
-		s += " | Energy: " + String.valueOf(getCurrentEnergy()) + "\n";
-		s += String.format("Stars: %d, Agi: %f, Dex: %f, Eth: %f, Int: %f, Psc: %f, Stam: %f, Str: %f\nHealth: %d | Energy: %d | Speed: %d\n"
+		String s = currentStats();
+		s += String.format("Stars: %d, Agi: %.2f, Dex: %.2f, Eth: %.2f, Int: %.2f, Psc: %.2f, Stam: %.2f, Str: %.2f\nHealth: %d | Energy: %d | Speed: %d\n"
 				+ "Pysical Damage: %d | Magic Damgage: %d | Healing: %d | Healability: %d\nPysical Defence: %.2f%% | Magic Defence: %.2f%%\n\n", playerStats.starCount, 
 				playerStats.agility, playerStats.dexterity, playerStats.ethics, playerStats.intellect, playerStats.psychotics, playerStats.stamina, playerStats.strength, 
 				totalHealth, totalEnergy, playerStats.getSpeed() + baseSpeed, playerStats.getPhysicalDamage() + basePhysicalDamage, playerStats.getMagicDamage() + baseMagicDamage, 

@@ -2,6 +2,7 @@ import java.util.ArrayList;
 
 public abstract class Ability {
 	
+	String name;
 	Character owner;
 	double energyCost, multiplier;
 	ArrayList<BuffDebuff> appliedEffects;
@@ -75,6 +76,14 @@ public abstract class Ability {
 
 	public void setAttackCounter(int attackCounter) {
 		this.attackCounter = attackCounter;
+	}
+
+	public String getName() {
+		return name;
+	}
+
+	public void setName(String name) {
+		this.name = name;
 	}
 	
 	

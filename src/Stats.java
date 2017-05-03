@@ -104,11 +104,11 @@ public class Stats {
 	}
 	
 	public double getPhysicalDefence(){
-		return (((stamina)+(strength))/(12*(MAXADDER*MAXLEVEL)));
+		return (((1.3*stamina)+(.5*strength)+(.2*intellect))/(12*(MAXADDER*MAXLEVEL)));
 	}
 	
 	public double getMagicDefence(){
-		return (((dexterity)+(psychotics))/(12*(MAXADDER*MAXLEVEL)));
+		return (((1.3*dexterity)+(.5*psychotics)+(.2*ethics))/(12*(MAXADDER*MAXLEVEL)));
 	}
 	
 	public int getPhysicalDamage(){

@@ -11,20 +11,6 @@ public class Hero extends Character{
 			 potency, dodge, playerStats);
 	}
 	
-	public void levelUp(){
-		playerStats.levelUp();
-		totalHealth = baseHealth + playerStats.getHealth();
-		currentHealth = totalHealth;
-		totalEnergy = baseEnergy + playerStats.getEnergy();
-		currentEnergy = totalEnergy;
-	}
 	
-	public void promote(){
-		playerStats.promote();
-		totalHealth = baseHealth + playerStats.getHealth();
-		currentHealth = totalHealth;
-		totalEnergy = baseEnergy + playerStats.getEnergy();
-		currentEnergy = totalEnergy;
-	}
 	
 }
