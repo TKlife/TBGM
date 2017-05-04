@@ -200,6 +200,7 @@ public class Testing {
 	
 	private static void testBinder(){
 		Binder<Effect> effectsBinder = new Binder<Effect>();
+		Binder<BuffDebuff> buffBinder = new Binder<BuffDebuff>();
 		Effect item = new Effect(){
 			double oldMagicDefence, oldPhysicalDefence;
 			@Override
@@ -219,7 +220,10 @@ public class Testing {
 				// TODO Auto-generated method stub
 			}
 		};
+		BuffDebuff buff = new CharacterModifier("Defence Down", false, false, 2);
+		buff.addEffect(effectsBinder.getItem("Defence Down"));
 		effectsBinder.addEntry("Defence Down", item);
+		buffBinder.addEntry("Defence Down", buff);
 		System.out.println(effectsBinder.toString());
 	}
 	
