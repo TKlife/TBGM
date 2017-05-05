@@ -1,3 +1,4 @@
+import java.util.ArrayList;
 
 public class CharacterModifier extends BuffDebuff {
 	
@@ -50,6 +51,29 @@ public class CharacterModifier extends BuffDebuff {
 			effect.overTime(reciever);
 		}
 		return false;
+	}
+	
+	@Override
+	public String toString(){
+		String s = name + ":\n";
+		String[] words;
+		int length = 0, lineLength = 30;
+		for (Effect e: effects){
+			words = e.toString().split(" ");
+			for (int i = 0; i < words.length; i++){
+				if(length > lineLength){
+					s += "\n";
+					length = 0;
+				}
+				s += words[i];
+				length += words[i].length() + 1;
+				if (i != words.length - 1){
+					s += " ";
+				}
+			}
+			s += ". ";
+		}
+		return s;
 	}
 
 }

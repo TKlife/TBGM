@@ -1,6 +1,6 @@
 import java.util.ArrayList;
 
-public abstract class BuffDebuff {
+public class BuffDebuff {
 	
 	String name;
 	int duration, stack;
@@ -24,9 +24,57 @@ public abstract class BuffDebuff {
 		this.stack = 1;
 		this.effects = new ArrayList();
 	}
-	public abstract boolean applyEffect(Character reciever);
-	public abstract boolean reverseEffect(Character reciever);
-	public abstract boolean overTimeEffect(Character reciever);
+	
+	public boolean applyEffect(Character reciever) {
+		if(hasBuffDebuff(reciever)){
+			return false;
+		}
+		for (Effect effect: effects){
+			effect.apply(reciever);	
+		}
+		if(buff){
+			reciever.getBuffs().add(this);
+		} else {
+			reciever.getDebuffs().add(this);
+		}
+		return true;
+	}
+
+	public boolean reverseEffect(Character reciever) {
+		for (Effect effect: effects){
+			effect.reverse(reciever);
+		}
+		return true;
+	}
+
+	public boolean overTimeEffect(Character reciever) {
+		for(Effect effect: effects){
+			effect.overTime(reciever);
+		}
+		return false;
+	}
+	
+	public String toString(){
+		String s = name + ":\n";
+		String[] words;
+		int length = 0, lineLength = 30;
+		for (Effect e: effects){
+			words = e.toString().split(" ");
+			for (int i = 0; i < words.length; i++){
+				if(length > lineLength){
+					s += "\n";
+					length = 0;
+				}
+				s += words[i];
+				length += words[i].length() + 1;
+				if (i != words.length - 1){
+					s += " ";
+				}
+			}
+			s += ". ";
+		}
+		return s;
+	}
 
 	public boolean endTurn(Character affected){
 		if(duration == 0){

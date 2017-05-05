@@ -6,12 +6,16 @@ import javax.swing.event.ListSelectionEvent;
 
 public class Testing {
 
+	public static Binder<BuffDebuff> buffBinder = new Binder();
+	public static Binder<Effect> effectsBinder = new Binder();
+	public static Binder<Character> characterBinder = new Binder();
+	
 	public static void main(String[] args) {
 		// TODO Auto-generated method stub
 		//testStats();
 		//testCharacter();
-		testBuffDebuffAbility();
 		testBinder();
+		testBuffDebuffAbility();
 	}
 	
 	private static void testBuffDebuffAbility(){
@@ -33,37 +37,16 @@ public class Testing {
 		System.out.println(tank.toString());
 		System.out.println(healer.toString());
 		
-		BuffDebuff offenceDown = new StatModifier("Offence Down", false, false, 3, false);
-		BuffDebuff offenceUp = new StatModifier("Offence Up", true, false, 5, false, 1,1.5,1,1,1,1,1.5);
-		BuffDebuff defenceDown = new CharacterModifier("Defence Down", false, false, 3);
-		defenceDown.addEffect(new Effect(){
-			double oldMagicDefence, oldPhysicalDefence;
-			@Override
-			public void apply(Character affected) {
-				oldMagicDefence = affected.getBaseMagicDefence();
-				oldPhysicalDefence = affected.getBasePhysicalDefence();
-				affected.setBaseMagicDefence(-0.5);
-				affected.setBasePhysicalDefence(-0.5);
-			}@Override
-			public void reverse(Character affected) {
-				// TODO Auto-generated method stub
-				affected.setBaseMagicDefence(oldMagicDefence);
-				affected.setBasePhysicalDefence(oldPhysicalDefence);
-			}
-			@Override
-			public void overTime(Character affected) {
-				// TODO Auto-generated method stub
-			}
-		});
-		((StatModifier)(offenceDown)).setStrength(0.5);
-		((StatModifier)(offenceDown)).setPsychotics(0.5);
+		BuffDebuff defenceUp = buffBinder.getItem("Defence Up");
+		BuffDebuff berzerk = buffBinder.getItem("Berzerk");
+		BuffDebuff defenceDown = buffBinder.getItem("Defence Down");
 		
-		offenceDown.applyEffect(dps);
-		offenceUp.applyEffect(tank);
+		defenceUp.applyEffect(dps);
+		berzerk.applyEffect(tank);
 		defenceDown.applyEffect(tank);
 		System.out.println(dps.toString());
 		System.out.println(tank.toString());
-		for (int i = 0; i< 6; i++){
+		for (int i = 0; i< 8; i++){
 			System.out.println("DPS Attacking");
 			dps.useAbility(0, tank);
 			System.out.println("\n" + tank.currentStats());
@@ -73,6 +56,8 @@ public class Testing {
 			System.out.println("\n" + dps.currentStats());
 			tank.endTurn();
 		}
+		System.out.println(dps.toString());
+		System.out.println(tank.toString());
 	}
 	
 	private static void testCharacter(){
@@ -199,16 +184,15 @@ public class Testing {
 	}
 	
 	private static void testBinder(){
-		Binder<Effect> effectsBinder = new Binder<Effect>();
-		Binder<BuffDebuff> buffBinder = new Binder<BuffDebuff>();
-		Effect item = new Effect(){
-			double oldMagicDefence, oldPhysicalDefence;
+	
+		effectsBinder.addEntry("Defence Down", new Effect(){
+			private double oldMagicDefence, oldPhysicalDefence;
 			@Override
 			public void apply(Character affected) {
 				oldMagicDefence = affected.getBaseMagicDefence();
 				oldPhysicalDefence = affected.getBasePhysicalDefence();
-				affected.setBaseMagicDefence(-0.5);
-				affected.setBasePhysicalDefence(-0.5);
+				affected.setBaseMagicDefence(oldMagicDefence-0.5);
+				affected.setBasePhysicalDefence(oldPhysicalDefence-0.5);
 			}@Override
 			public void reverse(Character affected) {
 				// TODO Auto-generated method stub
@@ -219,12 +203,73 @@ public class Testing {
 			public void overTime(Character affected) {
 				// TODO Auto-generated method stub
 			}
-		};
-		BuffDebuff buff = new CharacterModifier("Defence Down", false, false, 2);
-		buff.addEffect(effectsBinder.getItem("Defence Down"));
-		effectsBinder.addEntry("Defence Down", item);
-		buffBinder.addEntry("Defence Down", buff);
-		System.out.println(effectsBinder.toString());
+			@Override
+			public String toString() {
+				String s = "Character has -50% defence";
+				return s;
+			}
+		});
+		buffBinder.addEntry("Defence Down", new BuffDebuff("Defence Down", false, false, 2));
+		buffBinder.getItem("Defence Down").addEffect(effectsBinder.getItem("Defence Down"));
+		
+		effectsBinder.addEntry("Defence Up", new Effect(){
+			private double oldMagicDefence, oldPhysicalDefence;
+			
+			@Override
+			public void apply(Character affected) {
+				oldMagicDefence = affected.getBaseMagicDefence();
+				oldPhysicalDefence = affected.getBasePhysicalDefence();
+				affected.setBaseMagicDefence(oldMagicDefence + 0.5);
+				affected.setBasePhysicalDefence(oldPhysicalDefence + 0.5);
+			}
+			@Override
+			public void reverse(Character affected) {
+				affected.setBaseMagicDefence(oldMagicDefence);
+				affected.setBasePhysicalDefence(oldPhysicalDefence);
+			}
+			@Override
+			public void overTime(Character affected) {
+				
+			}
+			@Override
+			public String toString() {
+				String s = "";
+				s += "Character has +50% defence";
+				return s;
+			}
+		});
+		buffBinder.addEntry("Defence Up", new BuffDebuff("Defence Up", true, false, 2));
+		buffBinder.getItem("Defence Up").addEffect(effectsBinder.getItem("Defence Up"));
+		
+		effectsBinder.addEntry("Berzerk", new Effect(){
+			private double oldStrength, oldDexterity;
+			
+			@Override
+			public void apply(Character affected) {
+				oldStrength = affected.getPlayerStats().getStrength();
+				oldDexterity = affected.getPlayerStats().getDexterity();
+				affected.getPlayerStats().setStrength(oldStrength*1.5);
+				affected.getPlayerStats().setDexterity(oldDexterity*1.5);
+			}
+			@Override
+			public void reverse(Character affected) {
+				affected.getPlayerStats().setStrength(oldStrength);
+				affected.getPlayerStats().setDexterity(oldDexterity);
+			}
+			@Override
+			public void overTime(Character affected) {
+				
+			}
+			@Override
+			public String toString() {
+				String s = "";
+				s += "Character gains 50% more strength and dexterity";
+				return s;
+			}
+		});
+		buffBinder.addEntry("Berzerk", new BuffDebuff("Berzerk", true, false, 2));
+		buffBinder.getItem("Berzerk").addEffect(effectsBinder.getItem("Berzerk"));
+		System.out.println(buffBinder.toString());
 	}
 	
 	private static void testStats(){

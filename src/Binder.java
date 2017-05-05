@@ -26,7 +26,10 @@ public class Binder<BinderItem> {
 		public void setItem(BinderItem item) {
 			this.item = item;
 		}
-		
+		@Override
+		public String toString(){
+			return item.toString();
+		}
 	}
 	
 	ArrayList<Entry> binder;
@@ -43,6 +46,11 @@ public class Binder<BinderItem> {
 		binder.add(new Entry(name, item));
 	}
 	
+	public BinderItem getItem(int index){
+		
+		return binder.get(index).getItem();
+	}
+	
 	public BinderItem getItem(String name){
 		for (Entry entry: binder){
 			if(name.equals(entry.getName())){
@@ -57,7 +65,8 @@ public class Binder<BinderItem> {
 		String s = "";
 		int i = 1;
 		for (Entry entry: binder){
-			s = String.valueOf(i) + ". " + entry.getName() + "\n";
+			s += String.valueOf(i) + ". " + entry.toString() + "\n";
+			i++;
 		}
 		return s;
 	}

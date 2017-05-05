@@ -6,6 +6,7 @@ public abstract class Effect {
 	public abstract void apply(Character affected);
 	public abstract void reverse(Character affected);
 	public abstract void overTime(Character affected);
+	public abstract String toString();
 	
 	public String getName() {
 		return name;
@@ -13,6 +14,8 @@ public abstract class Effect {
 	public void setName(String name) {
 		this.name = name;
 	}
+	
+	
 	
 	
 }
