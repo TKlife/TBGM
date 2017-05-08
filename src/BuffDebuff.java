@@ -1,6 +1,7 @@
+import java.io.Serializable;
 import java.util.ArrayList;
 
-public class BuffDebuff {
+public class BuffDebuff implements Serializable {
 	
 	String name;
 	int duration, stack;
@@ -12,7 +13,10 @@ public class BuffDebuff {
 		this.buff = toCopy.isBuff();
 		this.duration = toCopy.getDuration();
 		this.overTime = toCopy.isOverTime();
-		this.effects = toCopy.getEffects();
+		this.effects = new ArrayList<Effect>();
+		for(Effect effect: toCopy.getEffects()){
+			effects.add((Effect) Utilities.copy(effect));
+		}
 		this.stack = toCopy.getStack();
 	}
 	public BuffDebuff(String name, boolean buff, boolean overTime, int duration) {
@@ -33,9 +37,9 @@ public class BuffDebuff {
 			effect.apply(reciever);	
 		}
 		if(buff){
-			reciever.getBuffs().add(this);
+			reciever.addBuff(this);
 		} else {
-			reciever.getDebuffs().add(this);
+			reciever.addDebuff(this);
 		}
 		return true;
 	}
@@ -47,47 +51,51 @@ public class BuffDebuff {
 		return true;
 	}
 
-	public boolean overTimeEffect(Character reciever) {
+	public boolean onEnd(Character affected) {
 		for(Effect effect: effects){
-			effect.overTime(reciever);
+			if(!effect.isOnStart()){
+				effect.overTime(affected);
+			} else return false;
 		}
-		return false;
+		return true;
 	}
 	
-	public String toString(){
-		String s = name + ":\n";
-		String[] words;
-		int length = 0, lineLength = 30;
-		for (Effect e: effects){
-			words = e.toString().split(" ");
-			for (int i = 0; i < words.length; i++){
-				if(length > lineLength){
-					s += "\n";
-					length = 0;
-				}
-				s += words[i];
-				length += words[i].length() + 1;
-				if (i != words.length - 1){
-					s += " ";
-				}
-			}
-			s += ". ";
+	public boolean onStart(Character affected){
+		for(Effect effect: effects){
+			if(effect.isOnStart()){
+				effect.overTime(affected);
+			} else return false;
 		}
-		return s;
+		return true;
+	}
+	
+	public boolean onDamage(Character affected){
+		for(Effect effect: effects){
+			if(!effect.isOnEvade()){
+				effect.onDamage(affected);
+			}
+		}
+		return true;
+	}
+	
+	public boolean onEvade(Character affected) {
+		for(Effect effect: effects){
+			if(effect.isOnEvade()){
+				effect.onDamage(affected);
+			} else return false;
+		}
+		return true;
 	}
 
 	public boolean endTurn(Character affected){
 		if(duration == 0){
 			return true;
 		} else {
-			if(overTime){
-				this.overTimeEffect(affected);
-			}
 			duration--;
 			return false;
 		}
 	}
-
+	
 	public boolean hasBuffDebuff(Character reciever){
 		BuffDebuff hasBuff = reciever.hasBuffDebuff(this);
 		if (hasBuff != null){
@@ -142,7 +150,25 @@ public class BuffDebuff {
 		this.effects = effects;
 	}
 	
-	
-	
-	
+	public String toString(){
+		String s = name + ":\n";
+		String[] words;
+		int length = 0, lineLength = 30;
+		for (Effect e: effects){
+			words = e.toString().split(" ");
+			for (int i = 0; i < words.length; i++){
+				if(length > lineLength){
+					s += "\n";
+					length = 0;
+				}
+				s += words[i];
+				length += words[i].length() + 1;
+				if (i != words.length - 1){
+					s += " ";
+				}
+			}
+			s += ". ";
+		}
+		return s;
+	}	
 }

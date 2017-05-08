@@ -1,7 +1,8 @@
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Random;
 
-public abstract class Character {
+public class Character implements Serializable{
 	
 	public static Random random = new Random();
 	int level;
@@ -9,7 +10,7 @@ public abstract class Character {
 	int basePhysicalDamage, baseMagicDamage, baseHealing, baseHealability;
 	double basePhysicalDefence, baseMagicDefence;
 	int currentHealth, totalHealth, currentEnergy, totalEnergy;
-	double critChance, potency, dodge;
+	double critChance, potency, tenacity, evasion, counter;
 	int turnMeter;
 	String name;
 	Stats playerStats;
@@ -18,7 +19,7 @@ public abstract class Character {
 	ArrayList<BuffDebuff> debuffs;
 	
 	public Character(String name, int baseHealth, int baseEnergy, int baseSpeed, int basePysicalDamage, int baseMagicDamage, int baseHealing, int baseHealability,
-			double basePhysicalDefence, double baseMagicDefence, double critChance, double potency, double dodge, Stats playerStats) {
+			double basePhysicalDefence, double baseMagicDefence, double critChance, double potency, double evasion, Stats playerStats) {
 		super();
 		this.name = name;
 		this.baseHealth = baseHealth;
@@ -32,7 +33,7 @@ public abstract class Character {
 		this.baseMagicDefence = baseMagicDefence;
 		this.critChance = critChance;
 		this.potency = potency;
-		this.dodge = dodge;
+		this.evasion = evasion;
 		this.playerStats = playerStats;
 		
 		levelUp();
@@ -45,7 +46,6 @@ public abstract class Character {
 		buffs = new ArrayList();
 		debuffs = new ArrayList();
 	}
-	
 	public void levelUp(){
 		playerStats.levelUp();
 		totalHealth = baseHealth + playerStats.getHealth();
@@ -61,6 +61,26 @@ public abstract class Character {
 		}
 	}
 	
+	public void unlockAbility(int index){
+		abilities.get(index).unLock();
+	}
+	
+	public void levelAbility(int index){
+		abilities.get(index).levelUp();
+	}
+	
+	public void maxOut(){
+		while(playerStats.starCount < 7){
+			promote();
+		}
+		for (Ability ability: abilities){
+			ability.unLock();
+			while(ability.getLevel() < ability.getMaxLevel()){
+				levelAbility(abilities.indexOf(ability));
+			}
+		}
+	}
+	
 	public void promote(){
 		playerStats.promote();
 		totalHealth = baseHealth + playerStats.getHealth();
@@ -69,22 +89,43 @@ public abstract class Character {
 		currentEnergy = totalEnergy;
 	}
 	
+	public void startTurn(){
+		for (BuffDebuff buff: buffs){
+			buff.onStart(this);
+		}
+		for (BuffDebuff debuff: debuffs){
+			debuff.onStart(this);
+		}
+	}
+	
 	public void endTurn(){
 		resetTurnMeter();
 		ArrayList<BuffDebuff> remove = new ArrayList();
 
 		for (BuffDebuff buff: buffs){
-			if(buff.endTurn(this)) {
+			if(buff.getDuration() <= 1) {
 				buff.reverseEffect(this);
 				remove.add(buff);
+			} else {
+				buff.onEnd(this);
+				buff.setDuration(buff.getDuration()-1);
 			}
 		}
 		buffs.removeAll(remove);
 		remove.clear();
 		for (BuffDebuff debuff: debuffs){
-			if(debuff.endTurn(this)) {
+			if(debuff.getDuration() <= 0) {
 				debuff.reverseEffect(this);
 				remove.add(debuff);
+			} else {
+				debuff.onEnd(this);
+				debuff.setDuration(debuff.getDuration()-1);
+			}
+		}
+		for (Ability ability: abilities){
+			int cooldownCounter = ability.getCooldownCounter();
+			if (cooldownCounter != 0){
+				ability.setCooldownCounter(cooldownCounter-1);
 			}
 		}
 		debuffs.removeAll(remove);
@@ -97,30 +138,45 @@ public abstract class Character {
 		}
 	}
 	
-	public void recoverHealth(int recover){
-		setCurrentHealth(currentHealth + recover);
-		if (currentHealth >= totalHealth){
-			currentHealth = totalHealth;
+	private boolean evadeAttampt() {
+		int evasion = random.nextInt(100);
+		if(evasion < (int) (this.evasion*100)){
+			return true;
 		}
+		return false;
 	}
 	
 	public void useAbility(int index, Character useOn){
-		abilities.get(index).useAbility(useOn);
+		Ability ability = abilities.get(index);
+		useAbility(ability, useOn);
 	}
 	
 	public void useAbility(Ability ability, Character useOn){
+		int uses = 1;
 		if(abilities.contains(ability)){
+			if(this.hasBuff("Duel Wield") != null){
+				uses += 1;
+			}
+			for (int i = 0; i < uses; i++){
 				ability.useAbility(useOn);
+			}
 		}
 	}
-	
+
 	public void useAbility(int index, ArrayList<Character> useOn){
-		abilities.get(index).useAbility(useOn);
+		Ability ability = abilities.get(index);
+		useAbility(ability, useOn);
 	}
 	
 	public void useAbility(Ability ability, ArrayList<Character> useOn){
+		int uses = 1;
 		if(abilities.contains(ability)){
+			if(this.hasBuff("Duel Wield") != null){
+				uses += 1;
+			}
+			for (int i = 0; i < uses; i++){
 				ability.useAbility(useOn);
+			}
 		}
 	}
 	
@@ -129,19 +185,49 @@ public abstract class Character {
 		double tired = 62.5 * ((double)(currentEnergy)/(double)(totalEnergy));
 		health = (int) (health+ (getHealability()*((luck+tired)/100.0)));
 		System.out.print(" | After Healability: " + health + "\n");
-		recoverHealth(health);
+		setCurrentHealth(health);
 	}
 	
-	public void defendPhysicalAttack(int damage){
-		damage = (int) (damage - (damage*getPhysicalDefence()));
-		System.out.print(" | After Defence: " + damage + "\n");
+	public boolean defendPhysicalAttack(int damage){
+		
+		boolean success = true;
+		if(!evadeAttampt()){
+			damage = (int) (damage - (damage*getPhysicalDefence()));
+			System.out.print(" | After Defence: " + damage + "\n");
+		} else {
+			damage = 0;
+			success = false;
+			System.out.println("\nEvaded");
+			for(BuffDebuff buff: buffs){
+				buff.onEvade(this);
+			}
+			for(BuffDebuff debuff: debuffs){
+				debuff.onEvade(this);
+			}
+		}
 		takeDamage(damage);
+		return success;
 	}
 	
-	public void defendMagicalAttack(int damage){
-		damage = (int) (damage - (damage*getMagicDefence()));
-		System.out.print(" | After Defence: " + damage + "\n");
+	public boolean defendMagicalAttack(int damage){
+		
+		boolean success = true;
+		if(!evadeAttampt()){
+			damage = (int) (damage - (damage*getPhysicalDefence()));
+			System.out.print(" | After Defence: " + damage + "\n");
+		} else {
+			damage = 0;
+			success = false;
+			System.out.println("\nEvaded");
+			for(BuffDebuff buff: buffs){
+				buff.onEvade(this);
+			}
+			for(BuffDebuff debuff: debuffs){
+				debuff.onEvade(this);
+			}
+		}
 		takeDamage(damage);
+		return success;
 	}
 	
 	public int heal(){
@@ -190,24 +276,33 @@ public abstract class Character {
 	}
 	
 	public void resetTurnMeter(){
-		turnMeter = 1000 - getSpeed();
+		turnMeter += (1000 - getSpeed());
 	}
 	
 	public BuffDebuff hasBuffDebuff(BuffDebuff buffDebuff){
 		if(buffDebuff.isBuff()){
-			for(BuffDebuff buff: buffs){
-				if (buffDebuff.getName().equals(buff.getName())){
-					return buff;
-				}
-			}
+			return hasBuff(buffDebuff.getName());
 		} else{
-			for(BuffDebuff debuff: debuffs){
-				if (buffDebuff.getName().equals(debuff.getName())){
-					return debuff;
-				}
-			}
+			return hasDebuff(buffDebuff.getName());
 		}
 		
+	}
+	
+	public BuffDebuff hasBuff(String name){
+		for(BuffDebuff buff: buffs){
+			if (buff.getName().equals(name)){
+				return buff;
+			}
+		}
+		return null;
+	}
+	
+	public BuffDebuff hasDebuff(String name){
+		for(BuffDebuff debuff: debuffs){
+			if (debuff.getName().equals(name)){
+				return debuff;
+			}
+		}
 		return null;
 	}
 	
@@ -262,6 +357,11 @@ public abstract class Character {
 	}
 	public void setCurrentHealth(int currentHealth) {
 		this.currentHealth = currentHealth;
+		if (this.currentHealth < 0){
+			this.currentHealth = 0;
+		} else if(this.currentHealth > totalHealth){
+			this.currentHealth = totalHealth;
+		}
 	}
 	public int getTotalHealth() {
 		return totalHealth;
@@ -274,8 +374,10 @@ public abstract class Character {
 	}
 	public void setCurrentEnergy(int currentEnergy) {
 		this.currentEnergy = currentEnergy;
-		if(this.currentEnergy < 0){
-			this.currentEnergy = 0;
+		if(this.currentEnergy < -totalEnergy){
+			this.currentEnergy = -totalEnergy;
+		} else if(this.currentEnergy > 2*totalEnergy){
+			this.currentEnergy = totalEnergy;
 		}
 	}
 	public int getTotalEnergy() {
@@ -297,16 +399,19 @@ public abstract class Character {
 		this.potency = potency;
 	}
 	public double getDodge() {
-		return dodge;
+		return evasion;
 	}
-	public void setDodge(double dodge) {
-		this.dodge = dodge;
+	public void setDodge(double evasion) {
+		this.evasion = evasion;
 	}
 	public int getTurnMeter() {
 		return turnMeter;
 	}
 	public void setTurnMeter(int turnMeter) {
 		this.turnMeter = turnMeter;
+		if (this.turnMeter > (1000-getSpeed())){
+			resetTurnMeter();
+		}
 	}
 	public static Random getRandom() {
 		return random;
@@ -381,12 +486,20 @@ public abstract class Character {
 		return buffs.get(index);
 	}
 
+	public void addBuff(BuffDebuff buff){
+		buffs.add((BuffDebuff) Utilities.copy(buff));
+	}
+	
 	public void setBuffs(ArrayList<BuffDebuff> buffs) {
 		this.buffs = buffs;
 	}
 
 	public ArrayList<BuffDebuff> getDebuffs() {
 		return debuffs;
+	}
+	
+	public void addDebuff(BuffDebuff debuff){
+		debuffs.add((BuffDebuff) Utilities.copy(debuff));
 	}
 	
 	public BuffDebuff getDebuff(int index) {
@@ -400,27 +513,59 @@ public abstract class Character {
 	public String currentStats(){
 		String s = name + ":\n";
 		s += "Health: " + String.valueOf(getCurrentHealth());
-		s += " | Energy: " + String.valueOf(getCurrentEnergy()) + "\n";
+		s += " | Energy: " + String.valueOf(getCurrentEnergy());
+		s += " | Turnmeter: " + String.valueOf(getTurnMeter()) + "\n";
 		s += "Buffs: ";
 		for (BuffDebuff buff: buffs){
-			s += buff.getName() + " " + buff.getDuration() + " | ";
-		} s += "\n";
+			s += buff.getName() + " " + (buff.getDuration()) + " | ";
+		} 
+		s += "\n";
 		s += "debuffs: ";
 		for (BuffDebuff debuff: debuffs){
-			s += debuff.getName() +  " " + debuff.getDuration() + " | ";
-		} s += "\n";
+			s += debuff.getName() +  " " + (debuff.getDuration()) + " | ";
+		} 
+		//s+= abilitiesString();
+		return s +"\n";
+	}
+	
+	public String abilitiesString(){
+		String s = "";
+		String words[];
+		int lineLength = 60, length = 0;
+		for (Ability ability: abilities){
+			words = ability.toString().split(" ");
+			s += "\n" + ability.getName() + ": ";
+			length += ability.getName().length();
+			for (int i = 0; i < words.length; i++){
+				if(length > lineLength){
+					s += "\n";
+					length = 0;
+				}
+				s += words[i];
+				length += words[i].length() + 1;
+				if (i != words.length - 1){
+					s += " ";
+				}
+			}
+			s += ". ";
+			s += "Cooldown: " + String.valueOf(ability.getCooldownCounter());
+			length = 0;
+		}
 		return s;
 	}
 	
 	@Override
 	public String toString(){
 		String s = currentStats();
+		String words[];
+		int lineLength = 60, length = 0;
 		s += String.format("Stars: %d, Agi: %.2f, Dex: %.2f, Eth: %.2f, Int: %.2f, Psc: %.2f, Stam: %.2f, Str: %.2f\nHealth: %d | Energy: %d | Speed: %d\n"
-				+ "Pysical Damage: %d | Magic Damgage: %d | Healing: %d | Healability: %d\nPysical Defence: %.2f%% | Magic Defence: %.2f%%\n\n", playerStats.starCount, 
-				playerStats.agility, playerStats.dexterity, playerStats.ethics, playerStats.intellect, playerStats.psychotics, playerStats.stamina, playerStats.strength, 
-				totalHealth, totalEnergy, playerStats.getSpeed() + baseSpeed, playerStats.getPhysicalDamage() + basePhysicalDamage, playerStats.getMagicDamage() + baseMagicDamage, 
-				playerStats.getHealing() + baseHealing, playerStats.getHealability() + baseHealability, 100*getPhysicalDefence(), 100*getMagicDefence());
-		return s;
+				+ "Pysical Damage: %d | Magic Damgage: %d | Healing: %d | Healability: %d\nPysical Defence: %.2f%% | Magic Defence: %.2f%% | Dodge Chance: %.2f%%",
+				playerStats.starCount, playerStats.agility, playerStats.dexterity, playerStats.ethics, playerStats.intellect, playerStats.psychotics, 
+				playerStats.stamina, playerStats.strength, totalHealth, totalEnergy, playerStats.getSpeed() + baseSpeed, playerStats.getPhysicalDamage()+basePhysicalDamage, 
+				playerStats.getMagicDamage() + baseMagicDamage, playerStats.getHealing() + baseHealing, playerStats.getHealability() + baseHealability, 
+				100*getPhysicalDefence(), 100*getMagicDefence(), 100*evasion);
+		return s + "\n\n";
 		
 	}
 }

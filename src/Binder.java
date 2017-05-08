@@ -48,13 +48,13 @@ public class Binder<BinderItem> {
 	
 	public BinderItem getItem(int index){
 		
-		return binder.get(index).getItem();
+		return (BinderItem) Utilities.copy(binder.get(index).getItem());
 	}
 	
 	public BinderItem getItem(String name){
 		for (Entry entry: binder){
 			if(name.equals(entry.getName())){
-				return entry.getItem();
+				return (BinderItem) Utilities.copy(entry.getItem());
 			}
 		}
 		return null;

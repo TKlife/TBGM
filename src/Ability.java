@@ -1,27 +1,38 @@
+import java.io.Serializable;
 import java.util.ArrayList;
 
-public abstract class Ability {
+public abstract class Ability implements Serializable{
 	
 	String name;
-	Character owner;
+	Character owner, target;
+	ArrayList<Character> secondaryTargets;
 	double energyCost, multiplier;
 	ArrayList<BuffDebuff> appliedEffects;
-	int numberOfAttacks, attackCounter;
+	int cooldown, cooldownCounter, level, maxLevel;
+	boolean hit = true;
 	
-	public Ability(Character owner, double energyCost, double multiplier) {
+	public Ability(Character owner, double energyCost, double multiplier, int cooldown, int maxLevel) {
 		this.owner = owner;
 		this.energyCost = energyCost;
 		this.multiplier = multiplier;
-		this.numberOfAttacks = 1;
+		this.cooldown = cooldown;
+		this.maxLevel = maxLevel;
 		appliedEffects = new ArrayList();
-		this.attackCounter = this.numberOfAttacks;
+		this.cooldownCounter = 0;
+		this.level = 0;
 	}
 
 	public abstract void useAbility(Character affected);
+	public abstract void levelUp();
+	public abstract String toString();
+	
+	public void unLock(){
+		levelUp();
+	}
 	
 	public void useAbility(ArrayList<Character> affected){
 		
-		if (attackCounter > 0){
+		if (cooldownCounter > 0){
 			for(Character chara: affected){
 				useAbility(chara);
 			}
@@ -62,20 +73,20 @@ public abstract class Ability {
 		this.appliedEffects = appliedEffects;
 	}
 
-	public int getNumberOfAttacks() {
-		return numberOfAttacks;
+	public int getCooldown() {
+		return cooldown;
 	}
 
-	public void setNumberOfAttacks(int numberOfAttacks) {
-		this.numberOfAttacks = numberOfAttacks;
+	public void setCooldown(int cooldown) {
+		this.cooldown = cooldown;
 	}
 
-	public int getAttackCounter() {
-		return attackCounter;
+	public int getCooldownCounter() {
+		return cooldownCounter;
 	}
 
-	public void setAttackCounter(int attackCounter) {
-		this.attackCounter = attackCounter;
+	public void setCooldownCounter(int cooldownCounter) {
+		this.cooldownCounter = cooldownCounter;
 	}
 
 	public String getName() {
@@ -84,6 +95,30 @@ public abstract class Ability {
 
 	public void setName(String name) {
 		this.name = name;
+	}
+
+	public Character getTarget() {
+		return target;
+	}
+
+	public void setTarget(Character target) {
+		this.target = target;
+	}
+
+	public int getLevel() {
+		return level;
+	}
+
+	public void setLevel(int level) {
+		this.level = level;
+	}
+
+	public int getMaxLevel() {
+		return maxLevel;
+	}
+
+	public void setMaxLevel(int maxLevel) {
+		this.maxLevel = maxLevel;
 	}
 	
 	

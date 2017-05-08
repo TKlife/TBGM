@@ -1,8 +1,8 @@
 
 public class BasicHeal extends Ability{
 
-	public BasicHeal(Character owner, double energyCost, double multiplier) {
-		super(owner, energyCost, multiplier);
+	public BasicHeal(Character owner, double energyCost, double multiplier, int cooldown, int maxLevel) {
+		super(owner, energyCost, multiplier, cooldown, maxLevel);
 		// TODO Auto-generated constructor stub
 	}
 
@@ -12,6 +12,19 @@ public class BasicHeal extends Ability{
 		System.out.print("Total Heal: " + heal);
 		affected.recieveHeal(heal);
 		owner.setCurrentEnergy((int) (owner.getCurrentEnergy()-(owner.getTotalEnergy()*energyCost)));
+		cooldownCounter = cooldown;
+	}
+
+	@Override
+	public void levelUp() {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public String toString() {
+		// TODO Auto-generated method stub
+		return null;
 	}
 
 }

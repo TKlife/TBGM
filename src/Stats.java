@@ -1,6 +1,7 @@
 import java.awt.geom.Arc2D.Double;
+import java.io.Serializable;
 
-public class Stats {
+public class Stats implements Serializable{
 	
 	public static int MAXLEVEL = 70; 
 	public static double MAXADDER = 6.0;
@@ -203,15 +204,12 @@ public class Stats {
 	public void setEthics(double ethics) {
 		this.ethics = ethics;
 	}
-
-	public double getPschotics() {
+	public double getPsychotics() {
 		return psychotics;
 	}
-
-	public void setPschotics(double psychotics) {
+	public void setPsychotics(double psychotics) {
 		this.psychotics = psychotics;
 	}
-
 	public double getIntelAdder() {
 		return intelAdder;
 	}
@@ -272,6 +270,26 @@ public class Stats {
 		return (int) Math.pow(a, b);
 	}
 	
+	public int getStarCount() {
+		return starCount;
+	}
+
+
+	public void setStarCount(int starCount) {
+		this.starCount = starCount;
+	}
+
+
+	public double getStrAdder() {
+		return strAdder;
+	}
+
+
+	public void setStrAdder(double strAdder) {
+		this.strAdder = strAdder;
+	}
+
+
 	@Override
 	public String toString(){
 		Stats playerStats = this;
