@@ -74,7 +74,7 @@ public class StatModifier extends BuffDebuff {
 			reciever.playerStats.setStamina(reciever.playerStats.getStamina() + stamina); 
 			reciever.playerStats.setAgility(reciever.playerStats.getAgility() + agility);
 			reciever.playerStats.setEthics(reciever.playerStats.getEthics() + ethics);
-			reciever.playerStats.setPschotics(reciever.playerStats.getPschotics() + psychotics);
+			reciever.playerStats.setPsychotics(reciever.playerStats.getPsychotics() + psychotics);
 		} else {
 			reciever.playerStats.setIntellect(reciever.playerStats.getIntellect()*intellect);
 			reciever.playerStats.setStrength(reciever.playerStats.getStrength() * strength);
@@ -82,7 +82,7 @@ public class StatModifier extends BuffDebuff {
 			reciever.playerStats.setStamina(reciever.playerStats.getStamina() * stamina); 
 			reciever.playerStats.setAgility(reciever.playerStats.getAgility() * agility);
 			reciever.playerStats.setEthics(reciever.playerStats.getEthics() * ethics);
-			reciever.playerStats.setPschotics(reciever.playerStats.getPschotics() * psychotics);
+			reciever.playerStats.setPsychotics(reciever.playerStats.getPsychotics() * psychotics);
 		}
 		return true;
 	}
@@ -100,7 +100,7 @@ public class StatModifier extends BuffDebuff {
 			reciever.playerStats.setStamina(reciever.playerStats.getStamina() - stamina); 
 			reciever.playerStats.setAgility(reciever.playerStats.getAgility() - agility);
 			reciever.playerStats.setEthics(reciever.playerStats.getEthics() - ethics);
-			reciever.playerStats.setPschotics(reciever.playerStats.getPschotics() - psychotics);
+			reciever.playerStats.setPsychotics(reciever.playerStats.getPsychotics() - psychotics);
 		} else {
 			reciever.playerStats.setIntellect(reciever.playerStats.getIntellect()/intellect);
 			reciever.playerStats.setStrength(reciever.playerStats.getStrength() / strength);
@@ -108,7 +108,7 @@ public class StatModifier extends BuffDebuff {
 			reciever.playerStats.setStamina(reciever.playerStats.getStamina() / stamina); 
 			reciever.playerStats.setAgility(reciever.playerStats.getAgility() / agility);
 			reciever.playerStats.setEthics(reciever.playerStats.getEthics() / ethics);
-			reciever.playerStats.setPschotics(reciever.playerStats.getPschotics() / psychotics);
+			reciever.playerStats.setPsychotics(reciever.playerStats.getPsychotics() / psychotics);
 		}
 		return true;
 	}

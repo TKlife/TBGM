@@ -51,6 +51,13 @@ public class BuffDebuff implements Serializable {
 		return true;
 	}
 
+	public boolean overTimeEffect(Character reciever) {
+		for(Effect effect: effects){
+			effect.overTime(reciever);
+		}
+		return true;
+	}
+		
 	public boolean onEnd(Character affected) {
 		for(Effect effect: effects){
 			if(!effect.isOnStart()){

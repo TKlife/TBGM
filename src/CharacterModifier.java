@@ -45,7 +45,6 @@ public class CharacterModifier extends BuffDebuff {
 		return true;
 	}
 
-	@Override
 	public boolean overTimeEffect(Character reciever) {
 		for(Effect effect: effects){
 			effect.overTime(reciever);
